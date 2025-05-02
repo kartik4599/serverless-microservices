@@ -1,0 +1,69 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: learning2serverless
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: micro
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: micro-serverless
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+functions:
+  signup:
+    handler: app/handler.signup
+    events:
+      - httpApi:
+          path: /signup
+          method: post
+  login:
+    handler: app/handler.login
+    events:
+      - httpApi:
+          path: /login
+          method: post
+  verify:
+    handler: app/handler.verify
+    events:
+      - httpApi:
+          path: /verify
+          method: post
+  profile:
+    handler: app/handler.profile
+    events:
+      - httpApi:
+          path: /user
+          method: post
+      - httpApi:
+          path: /user
+          method: put
+      - httpApi:
+          path: /user
+          method: get
+  cart:
+    handler: app/handler.cart
+    events:
+      - httpApi:
+          path: /cart
+          method: post
+      - httpApi:
+          path: /cart
+          method: put
+      - httpApi:
+          path: /cart
+          method: get
+  payment:
+    handler: app/handler.payment
+    events:
+      - httpApi:
+          path: /payment
+          method: post
+      - httpApi:
+          path: /payment
+          method: put
+      - httpApi:
+          path: /payment
+          method: get
+
+plugins:
+  - serverless-offline
