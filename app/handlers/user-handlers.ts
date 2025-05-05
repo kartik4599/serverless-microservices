@@ -2,13 +2,12 @@ import { UserService } from "app/services/user-service";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import middy from "@middy/core";
 import bodyParser from "@middy/http-json-body-parser";
-import { container } from "tsyringe";
 
-const userService = container.resolve(UserService);
+const userService = new UserService();
 
-export const signup = middy((event: APIGatewayProxyEventV2) => {
-  return userService.createUser(event);
-}).use(bodyParser());
+export const signup = middy((event: APIGatewayProxyEventV2) =>
+  userService.createUser(event)
+).use(bodyParser());
 
 export const login = async (event: APIGatewayProxyEventV2) => {
   return userService.userLogin(event);

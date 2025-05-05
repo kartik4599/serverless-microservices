@@ -67,3 +67,11 @@ functions:
 
 plugins:
   - serverless-offline
+  - serverless-offline-watcher
+
+custom:
+  serverless-offline-watcher:
+    - path:
+        - src/**/**
+      # this prints for example "received change event for src/path/to/file.ts"
+      command: "echo received $WATCHER_EVENT_TYPE event for $WATCHER_EVENT_PATH"
