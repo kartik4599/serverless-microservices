@@ -1,7 +1,8 @@
+import { LoginInput } from "app/models/dto/login-model";
 import { SignupInput } from "app/models/dto/sign-up";
 import { UserRepository } from "app/repository/user-repository";
 import { AppValidationError } from "app/utility/errors";
-import { getHashPassword } from "app/utility/password";
+import { getHashPassword, getToken, validate } from "app/utility/password";
 import { ErrorResponse, SuccessResponse } from "app/utility/response";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { plainToClass } from "class-transformer";
@@ -20,8 +21,6 @@ export class UserService {
 
       const hashedPassword = await getHashPassword(input.password);
 
-      console.log({ hashedPassword });
-
       const newUser = await this.repository.createUser({
         email: input.email,
         password: hashedPassword,
@@ -31,14 +30,27 @@ export class UserService {
 
       return SuccessResponse(newUser);
     } catch (e) {
-      console.log(e);
-
       return ErrorResponse(500, e);
     }
   }
 
-  public userLogin(event: APIGatewayProxyEventV2) {
-    return SuccessResponse({ message: "user logined" });
+  public async userLogin(event: APIGatewayProxyEventV2) {
+    try {
+      const input = plainToClass(LoginInput, event.body);
+      const error = await AppValidationError(input);
+      if (error) return ErrorResponse(401, error);
+
+      const account = await this.repository.findAccount(input.email);
+
+      const isValid = await validate(input.password, account.password);
+      if (!isValid) return ErrorResponse(401, "Invalid password");
+
+      const token = getToken(account);
+
+      return SuccessResponse({ token });
+    } catch (e) {
+      return ErrorResponse(500, e);
+    }
   }
 
   public userVerify(event: APIGatewayProxyEventV2) {

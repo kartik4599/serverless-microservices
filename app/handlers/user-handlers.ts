@@ -9,9 +9,9 @@ export const signup = middy((event: APIGatewayProxyEventV2) =>
   userService.createUser(event)
 ).use(bodyParser());
 
-export const login = async (event: APIGatewayProxyEventV2) => {
+export const login = middy((event: APIGatewayProxyEventV2) => {
   return userService.userLogin(event);
-};
+}).use(bodyParser());
 
 export const verify = async (event: APIGatewayProxyEventV2) => {
   return userService.userVerify(event);
