@@ -14,17 +14,12 @@ export const login = middy((event: APIGatewayProxyEventV2) => {
 }).use(bodyParser());
 
 export const verify = middy((event: APIGatewayProxyEventV2) => {
-  const httpMethod = event.requestContext.http.method.toLowerCase();
-
-  switch (httpMethod) {
-    case "post":
-      return userService.userVerify(event);
-    case "get":
-      return userService.getVerficationToken(event);
-    default:
-      return "Method not allowed";
-  }
+  return userService.getVerficationToken(event);
 });
+
+export const userVerify = middy((event: APIGatewayProxyEventV2) => {
+  return userService.userVerify(event);
+}).use(bodyParser());
 
 export const profile = async (event: APIGatewayProxyEventV2) => {
   const httpMethod = event.requestContext.http.method.toLowerCase();

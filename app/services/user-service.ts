@@ -1,6 +1,8 @@
 import { LoginInput } from "app/models/dto/login-model";
 import { SignupInput } from "app/models/dto/sign-up";
+import { VerificationInput } from "app/models/dto/verification-input-model";
 import { UserRepository } from "app/repository/user-repository";
+import { TimeDifference } from "app/utility/date-helper";
 import { AppValidationError } from "app/utility/errors";
 import {
   generateAccessCode,
@@ -68,13 +70,35 @@ export class UserService {
     if (!user) return ErrorResponse(401, "Invalid token");
 
     const { code, expire } = generateAccessCode();
-    // save code and expire in db
+    await this.repository.updateVerificationCode(user.user_id, code, expire);
 
-    await sendVerificationCode(code, user.phone);
+    // await sendVerificationCode(code, user.phone);
     return SuccessResponse({ message: "code sent" });
   }
 
-  public userVerify(event: APIGatewayProxyEventV2) {
+  async userVerify(event: APIGatewayProxyEventV2) {
+    const token = event.headers.authorization;
+    const user = await verfiyToken(token);
+    if (!user) return ErrorResponse(401, "Invalid token");
+
+    const input = plainToClass(VerificationInput, event.body);
+    const error = await AppValidationError(input);
+    if (error) return ErrorResponse(401, error);
+
+    const { verification_code, expiry } = await this.repository.findAccount(
+      user.email
+    );
+
+    if (verification_code !== input.code)
+      return ErrorResponse(401, "wrong code");
+
+    const currentDate = new Date();
+
+    const difference = TimeDifference(expiry, currentDate.toISOString(), "m");
+    if (difference <= 0) return ErrorResponse(401, "code expired");
+
+    await this.repository.updateVerificationUser(user.user_id);
+
     return SuccessResponse({ message: "user verified" });
   }
 

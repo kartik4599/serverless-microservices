@@ -22,7 +22,7 @@ functions:
       - httpApi:
           path: /login
           method: post
-  verify:
+  getVerify:
     handler: app/handler.verify
     environment:
       ACCOUNTSID: ${env:ACCOUNTSID}
@@ -30,10 +30,13 @@ functions:
     events:
       - httpApi:
           path: /verify
-          method: post
+          method: get
+  postVerify:
+    handler: app/handler.userVerify
+    events:
       - httpApi:
           path: /verify
-          method: get
+          method: post
   profile:
     handler: app/handler.profile
     events:
