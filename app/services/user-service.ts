@@ -2,7 +2,16 @@ import { LoginInput } from "app/models/dto/login-model";
 import { SignupInput } from "app/models/dto/sign-up";
 import { UserRepository } from "app/repository/user-repository";
 import { AppValidationError } from "app/utility/errors";
-import { getHashPassword, getToken, validate } from "app/utility/password";
+import {
+  generateAccessCode,
+  sendVerificationCode,
+} from "app/utility/notification";
+import {
+  getHashPassword,
+  getToken,
+  validate,
+  verfiyToken,
+} from "app/utility/password";
 import { ErrorResponse, SuccessResponse } from "app/utility/response";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { plainToClass } from "class-transformer";
@@ -51,6 +60,18 @@ export class UserService {
     } catch (e) {
       return ErrorResponse(500, e);
     }
+  }
+
+  async getVerficationToken(event: APIGatewayProxyEventV2) {
+    const token = event.headers.authorization;
+    const user = await verfiyToken(token);
+    if (!user) return ErrorResponse(401, "Invalid token");
+
+    const { code, expire } = generateAccessCode();
+    // save code and expire in db
+
+    await sendVerificationCode(code, user.phone);
+    return SuccessResponse({ message: "code sent" });
   }
 
   public userVerify(event: APIGatewayProxyEventV2) {

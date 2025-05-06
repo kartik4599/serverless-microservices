@@ -24,10 +24,16 @@ functions:
           method: post
   verify:
     handler: app/handler.verify
+    environment:
+      ACCOUNTSID: ${env:ACCOUNTSID}
+      AUTHTOKEN: ${env:AUTHTOKEN}
     events:
       - httpApi:
           path: /verify
           method: post
+      - httpApi:
+          path: /verify
+          method: get
   profile:
     handler: app/handler.profile
     events:
