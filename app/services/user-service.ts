@@ -103,8 +103,14 @@ export class UserService {
     return SuccessResponse({ message: "user verified" });
   }
 
-  public getUserProfile(event: APIGatewayProxyEventV2) {
-    return SuccessResponse({ message: "user profile" });
+  async getUserProfile(event: APIGatewayProxyEventV2) {
+    const token = event.headers.authorization;
+    const user = await verfiyToken(token);
+    if (!user) return ErrorResponse(401, "Invalid token");
+
+    const profile = await this.repository.getUserProfile(user.user_id);
+
+    return SuccessResponse(profile);
   }
 
   async createUserProfile(event: APIGatewayProxyEventV2) {

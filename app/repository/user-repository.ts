@@ -94,4 +94,22 @@ export class UserRepository extends DBOperation {
 
     return { updatedUser, address: result.rows[0] as AddressModel };
   }
+
+  async getUserProfile(userId: number) {
+    const queryString =
+      "SELECT first_name,last_name,user_type,verified FROM users WHERE user_id=$1";
+    const profileResult = await this.executeQuery(queryString, [userId]);
+    if (profileResult.rowCount < 1) throw new Error("User not found");
+
+    const userProfile = profileResult.rows[0] as UserModel;
+
+    const queryString2 =
+      "SELECT address_line1,address_line2,city,postal_code,country FROM address WHERE user_id=$1";
+    const addressResult = await this.executeQuery(queryString2, [userId]);
+
+    if (addressResult.rowCount > 0)
+      userProfile.address = addressResult.rows as AddressModel[];
+
+    return userProfile;
+  }
 }
