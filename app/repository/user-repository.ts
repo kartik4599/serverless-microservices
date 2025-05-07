@@ -104,12 +104,34 @@ export class UserRepository extends DBOperation {
     const userProfile = profileResult.rows[0] as UserModel;
 
     const queryString2 =
-      "SELECT address_line1,address_line2,city,postal_code,country FROM address WHERE user_id=$1";
+      "SELECT id,address_line1,address_line2,city,postal_code,country FROM address WHERE user_id=$1";
     const addressResult = await this.executeQuery(queryString2, [userId]);
 
     if (addressResult.rowCount > 0)
       userProfile.address = addressResult.rows as AddressModel[];
 
     return userProfile;
+  }
+
+  async updateProfile(
+    user_id: number,
+    {
+      firstName,
+      lastName,
+      userType,
+      address: { addressLine1, addressLine2, city, postal_code, country, id },
+    }: ProfileInput
+  ) {
+    await this.updateUser(user_id, firstName, lastName, userType);
+
+    const queryString =
+      "UPDATE address SET address_line1=$1,address_line2=$2,city=$3,postal_code=$4,country=$5 WHERE id=$6 RETURNING *";
+
+    const values = [addressLine1, addressLine2, city, postal_code, country, id];
+
+    const result = await this.executeQuery(queryString, values);
+    if (result.rowCount < 1) throw new Error("User");
+
+    return true;
   }
 }

@@ -127,8 +127,18 @@ export class UserService {
     return SuccessResponse(response);
   }
 
-  public updateUserProfile(event: APIGatewayProxyEventV2) {
-    return SuccessResponse({ message: "user profile" });
+  async updateUserProfile(event: APIGatewayProxyEventV2) {
+    const token = event.headers.authorization;
+    const user = await verfiyToken(token);
+    if (!user) return ErrorResponse(401, "Invalid token");
+
+    const input = plainToClass(ProfileInput, event.body);
+    const error = await AppValidationError(input);
+    if (error) return ErrorResponse(401, error);
+
+    await this.repository.updateProfile(user.user_id, input);
+
+    return SuccessResponse({ message: "user profile updated" });
   }
 
   public getCart(event: APIGatewayProxyEventV2) {
