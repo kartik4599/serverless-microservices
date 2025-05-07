@@ -46,6 +46,9 @@ functions:
       - httpApi:
           path: /user
           method: put
+  getProfile:
+    handler: app/handler.getProfile
+    events:
       - httpApi:
           path: /user
           method: get

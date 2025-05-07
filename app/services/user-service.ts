@@ -1,3 +1,4 @@
+import { ProfileInput } from "app/models/dto/address-input";
 import { LoginInput } from "app/models/dto/login-model";
 import { SignupInput } from "app/models/dto/sign-up";
 import { VerificationInput } from "app/models/dto/verification-input-model";
@@ -106,11 +107,21 @@ export class UserService {
     return SuccessResponse({ message: "user profile" });
   }
 
-  public updateUserProfile(event: APIGatewayProxyEventV2) {
-    return SuccessResponse({ message: "user profile" });
+  async createUserProfile(event: APIGatewayProxyEventV2) {
+    const token = event.headers.authorization;
+    const user = await verfiyToken(token);
+    if (!user) return ErrorResponse(401, "Invalid token");
+
+    const input = plainToClass(ProfileInput, event.body);
+    const error = await AppValidationError(input);
+    if (error) return ErrorResponse(401, error);
+
+    const response = await this.repository.createProfile(user.user_id, input);
+
+    return SuccessResponse(response);
   }
 
-  public deleteUserProfile(event: APIGatewayProxyEventV2) {
+  public updateUserProfile(event: APIGatewayProxyEventV2) {
     return SuccessResponse({ message: "user profile" });
   }
 

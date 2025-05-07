@@ -21,20 +21,22 @@ export const userVerify = middy((event: APIGatewayProxyEventV2) => {
   return userService.userVerify(event);
 }).use(bodyParser());
 
-export const profile = async (event: APIGatewayProxyEventV2) => {
+export const getProfile = middy((event: APIGatewayProxyEventV2) => {
+  return userService.getUserProfile(event);
+});
+
+export const profile = middy((event: APIGatewayProxyEventV2) => {
   const httpMethod = event.requestContext.http.method.toLowerCase();
 
   switch (httpMethod) {
-    case "get":
-      return userService.getUserProfile(event);
     case "put":
       return userService.updateUserProfile(event);
-    case "delete":
-      return userService.deleteUserProfile(event);
+    case "post":
+      return userService.createUserProfile(event);
     default:
       return "Method not allowed";
   }
-};
+}).use(bodyParser());
 
 export const cart = async (event: APIGatewayProxyEventV2) => {
   const httpMethod = event.requestContext.http.method.toLowerCase();
